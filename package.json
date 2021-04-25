@@ -1,0 +1,25 @@
+{
+  "name": "employee-manager",
+  "version": "1.0.0",
+  "description": "a node.js app to keep track of multiple employees",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Zane-Gilfillan/Employee-Manager.git"
+  },
+  "author": "Zane Gilfillan",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Zane-Gilfillan/Employee-Manager/issues"
+  },
+  "homepage": "https://github.com/Zane-Gilfillan/Employee-Manager#readme",
+  "dependencies": {
+    "dotenv": "^8.2.0",
+    "inquirer": "^8.0.0",
+    "mysql": "^2.18.1",
+    "nodemon": "^2.0.7"
+  }
+}
