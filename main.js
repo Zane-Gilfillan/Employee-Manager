@@ -7,10 +7,10 @@ const ascii = require('ascii-art-font');
 let init = () => {
 
     console.log("\n"+"=".repeat(62)+"\n");
-    ascii.create('    Employee','Doom',(err, result) => {
+    ascii.create('    Login Successful','Doom',(err, result) => {
         if (err) throw err;
         console.log(result);
-        ascii.create('      Manager','Doom',(err, result) => {
+        ascii.create('      Welcome!','Doom',(err, result) => {
             if (err) throw err;
             console.log(result);
             console.log("\n"+"=".repeat(62)+"\n");
