@@ -329,3 +329,116 @@ function updatePrompt(table_name) {
         }
     }
 }
+
+function removePrompt(table_name) {
+    if (table_name === false) {
+
+        inquirer.prompt([
+            {
+                message: "What do you want to remove?",
+                name: "table_name",
+                type: "list",
+                choices: [
+                    {
+                        name: "Employee",
+                        value: "employees"
+                    },
+                    {
+                        name: "Role",
+                        value: "roles"
+                    },
+                    {
+                        name: "Department",
+                        value: "departments"
+                    },
+                    {
+                        name: "Back to Main Menu",
+                        value: "mainMenu"
+                    }
+                ]
+            }
+        ]).then(answers => {
+            if (answers.table_name === "mainMenu") return mainPrompt();
+            return removePrompt(answers.table_name);
+        });
+
+    } else {
+
+        db.showAll(table_name, () => {});
+
+        if (table_name === "employees") {
+
+            db.choices.employees().then(res => {
+
+                inquirer.prompt([
+                    formatListQuestion("employee","id",res)
+                ]).then(answers => {
+                    db.deleteRow(table_name,answers, callMainPrompt);
+                });
+            });
+        } 
+        
+        else if (table_name === "roles") {
+            db.choices.roles().then(res => {
+
+                inquirer.prompt([
+                    formatListQuestion("role","id",res),
+                    {
+                        message: "This will delete all employees associated with this role. Are you sure?",
+                        name: "confirm",
+                        type: "confirm",
+
+                    }
+                ]).then(answers => {
+                    if (answers.confirm) {
+                        db.deleteRow(table_name,{id: answers.id}, callMainPrompt);
+                    }
+                });
+            });
+
+        } 
+        
+        else if (table_name === "departments") {
+            db.choices.departments().then(res => {
+                inquirer.prompt([
+                    formatListQuestion("department","id",res),
+                    {
+                        message: "This will delete all roles and employees associated with this department. Are you sure?",
+                        name: "confirm",
+                        type: "confirm",
+
+                    }
+                ]).then(answers => {
+                    if (answers.confirm) {
+                        db.deleteRow(table_name,{id: answers.id}, callMainPrompt);
+                    }
+                });
+            });
+        }
+    }
+}
+
+function quitApp() {
+    console.log("\n"+"=".repeat(62)+"\n");
+    ascii.create('    Goodbye!','Doom',(err, result) => {
+        if (err) throw err;
+        console.log(result);
+        console.log("\n"+"=".repeat(62)+"\n");
+        db.connection.end();
+    });
+}
+
+function formatListQuestion(identifier, colName, choices) {
+    return {
+        message: `Select ${identifier}:`,
+        type: "list",
+        name: `${colName}`,
+        choices
+    };
+}
+
+function callMainPrompt() {
+    mainPrompt();
+}
+
+module.exports.init = init;
