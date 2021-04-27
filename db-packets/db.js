@@ -4,8 +4,8 @@ require("dotenv").config();
 require('console.table');
 
 // Setup file dependencies
-const connectionInfo = require('./database_info.js');
-const app = require('./main.js');
+const connectionInfo = require('../db-packets/database_info');
+const app = require('../main.js');
 
 // Create database connection with .env variables
 const db = mysql.createConnection({

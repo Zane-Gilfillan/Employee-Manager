@@ -1,6 +1,6 @@
 // Setup dependencies
 const inquirer = require('inquirer');
-const db = require('./db.js');
+const db = require('./db-packets/db.js');
 const ascii = require('ascii-art-font');
 
 // Initalize the app
