@@ -58,7 +58,7 @@ function viewPrompt() {
     });
 }
 
-//choice for adding to database
+//function for adding to database
 
 function addPrompt(table_name) {
 
@@ -165,5 +165,167 @@ function addPrompt(table_name) {
         ]).then(answers => {
             db.createRow(answers,table_name, callMainPrompt);
         });
+    }
+}
+
+//function for updating any pre-existing data in db
+
+function updatePrompt(table_name) {
+    if (table_name === false) {
+
+        inquirer.prompt([
+            {
+                message: "What do you want to edit?",
+                name: "table_name",
+                type: "list",
+                choices: [
+                    {
+                        name: "Employee",
+                        value: "employees"
+                    },
+                    {
+                        name: "Role",
+                        value: "roles"
+                    },
+                    {
+                        name: "Department",
+                        value: "departments"
+                    },
+                    {
+                        name: "Back to Main Menu",
+                        value: "mainMenu"
+                    }
+                ]
+            }
+        ]).then(answers => {
+            if (answers.table_name === "mainMenu") return mainPrompt();
+            return updatePrompt(answers.table_name);
+        });
+
+    } else {
+
+        db.showAll(table_name, () => {});
+
+        if (table_name === "employees") {
+
+            db.choices.employees().then(res => {
+
+                inquirer.prompt([
+                    formatListQuestion("employee","employee_id",res),
+                    {
+                        message: "What do you want to update for this employee?",
+                        name: "whatToUpdate",
+                        type: "list",
+                        choices: ["Role","Manager","Both"]
+                    }
+                ]).then(answers => {
+
+                    let id = {id: answers.employee_id};
+
+                    switch(answers.whatToUpdate) {
+
+                        case "Role":
+                            db.choices.roles().then(res => {
+                                inquirer.prompt([formatListQuestion("role","role_id",res)]).then(answers => {
+                                    db.update(table_name,answers,id,callMainPrompt);
+                                }); 
+                            });
+                            break;
+                        case "Manager":
+                            db.choices.employees().then(res => {
+                                inquirer.prompt([formatListQuestion("manager","manager_id",res)]).then(answers => {
+                                    db.update(table_name,answers,id,callMainPrompt);
+                                });
+                            });
+                            break;
+                        case "Both":
+                            db.choices.roles().then(res => {
+                                inquirer.prompt([formatListQuestion("role","role_id",res)]).then(answers => {
+                                    let newInfo = answers;
+                                    db.choices.employees().then(res => {
+                                        inquirer.prompt([formatListQuestion("manager","manager_id",res)]).then(answers => {
+                                            newInfo.department_id = answers.department_id;
+                                            db.update(table_name,newInfo,id,callMainPrompt);
+                                        }); 
+                                    });
+                                }); 
+                            });
+                            break;
+
+                    }
+
+                });
+            });
+        } 
+        
+        else if (table_name === "roles") {
+            db.choices.roles().then(res => {
+                inquirer.prompt([
+                    formatListQuestion("role","id",res),
+                    {
+                        message: "What do you want to change?",
+                        type: "list",
+                        name: "whatToChange",
+                        choices: ["Title","Salary","Department"]
+                    }
+                ]).then(answers => {
+                    let roleId = answers.id;
+                    switch(answers.whatToChange) {
+                        case "Title":
+                            inquirer.prompt([
+                                {
+                                    message: "New title:",
+                                    name: "title"
+                                }
+                            ]).then(answers => {
+                                db.update(table_name, answers, {id: roleId}, callMainPrompt);
+                            });
+                            break;
+                        case "Salary":
+                            inquirer.prompt([
+                                {
+                                    message: "New salary:",
+                                    name: "salary",
+                                    validate: salary => {
+                                        if (isNaN(salary)) {
+                                            console.log("\n Invalid: Must be a number. Do not include decimals.");
+                                            return false;
+                                        } else {
+                                            return true;
+                                        }
+                                    }
+                                }
+                            ]).then(answers => {
+                                db.update(table_name, answers, {id: roleId}, callMainPrompt);
+                            });
+                            break;
+                        case "Department":
+                            db.choices.departments().then(res => {
+                                inquirer.prompt([
+                                    formatListQuestion("department","department_id",res)
+                                ]).then(answers => {
+                                    db.update(table_name, answers, {id: roleId}, callMainPrompt);
+                                });
+                            });
+                            break;
+                    }
+                });
+            });
+
+        } 
+        
+        else if (table_name === "departments") {
+            db.choices.departments().then(res => {
+                inquirer.prompt([
+                    formatListQuestion("department","id",res),
+                    {
+                        message: "New department name:",
+                        name: "name"
+                    }
+                ]).then(answers => {
+                    db.update(table_name, {name: answers.name}, {id: answers.id}, callMainPrompt);
+                });
+            });
+        }
     }
 }
